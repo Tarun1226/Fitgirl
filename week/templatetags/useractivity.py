@@ -11,7 +11,6 @@ register = template.Library()
 @register.simple_tag
 def is_week_done(user, item):
     profile = Profile.objects.filter(user_id=user.id).first()
-    print(profile.program_id)
     program = Program.objects.filter(program_id=profile.program_id).first()
     week = re.match('Week (\d+)$', item.text)[1]
     physical_count = UserActivity.objects.filter(user_id=user.id, Activity='physical', Week=week, program_id=program.program_id).count()
