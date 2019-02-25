@@ -88,7 +88,10 @@ class ParametersForm(forms.ModelForm):
     class Meta:
         model = Parameters
         fields = ('physical_days_to_done', 'nutrition_days_to_done')
-
+        labels = {
+            'physical_days_to_done': 'Required Physical Activities per Week',
+            'nutrition_days_to_done': 'Required Nutrition Activities per Week'
+            }
 
 class ContactForm(forms.Form):
     subject = forms.CharField(required=True)
