@@ -4,8 +4,8 @@ from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from .forms import LoginForm, UserEditForm, ProfileEditForm, ProgramForm, UploadFileForm, programArchiveForm, EmailForm, ParametersForm
 from .forms import Profile,User, Program, ContactForm
-from .models import RegisterUser, Affirmations, Dailyquote, Parameters
-from week.models import WeekPage, UserActivity
+from .models import RegisterUser, Affirmations, Dailyquote, Parameters, Reward
+from week.models import WeekPage, UserActivity, ServicePostPage
 from io import TextIOWrapper, StringIO
 import re
 
@@ -446,3 +446,30 @@ def parameters_form(request):
                      'nutrition_days_to_done': ndtd}
         )
     return render(request, 'account/parameters_edit.html', {'form': form})
+
+@login_required
+def rewards_redeem(request):
+    if request.method == "GET":
+        data = ServicePostPage.objects.get(page_ptr_id=10)
+        print(type(data.points_for_this_service))
+        return render(request, 'rewards/reward_confirmation.html')
+    else:
+        points = request.POST.get('points')
+        service = request.POST.get('service')
+        point = int(points)
+        print(type(point))
+        user1=User.objects.get(username=request.user.username)
+        print(user1.profile.points)
+        user1.profile.points -= point
+        user1.profile.save()
+        points_available = user1.profile.points
+        rewards = Reward.objects.create(user=user1, points_redeemed=point, service_used=service)
+        reward_number = rewards.reward_no
+        return render(request, 'rewards/reward_confirmation.html', {'point': point, 'service': service, 'points_available': points_available,
+                                                        'reward_number': reward_number})
+
+@login_required
+def viewRewards(request):
+    rewards = Reward.objects.all()
+    user = User.objects.get(username=request.user.username)
+    return render(request, 'rewards/viewRewards.html', {'rewards' : rewards, 'user': user})

@@ -268,6 +268,7 @@ class PreassessmentPage(AbstractForm):
     ]
 
     def serve(self, request, *args, **kwargs):
+        print('in def serve')
         if self.get_submission_class().objects.filter(page=self, user__pk=request.user.pk).exists():
             return render(
                 request,
@@ -278,9 +279,11 @@ class PreassessmentPage(AbstractForm):
         return super().serve(request, *args, **kwargs)
 
     def get_submission_class(self):
+        print('get_submission_class')
         return CustomFormSubmission
 
     def process_form_submission(self, form):
+        print('process_form_submission')
         self.get_submission_class().objects.create(
             form_data=json.dumps(form.cleaned_data, cls=DjangoJSONEncoder),
             page=self, user=form.user)
@@ -357,6 +360,20 @@ class RewardsPostPage(Page):
         FieldPanel('description', classname="full"),
         ImageChooserPanel('display_image')
     ]
+
+#services for reward redemption: hghanta
+class ServicePostPage(AbstractForm):
+    display_image = models.ForeignKey('wagtailimages.Image', null= True, blank=True, on_delete=models.SET_NULL, related_name='+')
+    description = RichTextField(blank=True)
+    points_for_this_service = models.IntegerField(blank=True, default=0)
+
+    content_panels = Page.content_panels + [
+        ImageChooserPanel('display_image'),
+        FieldPanel('description', classname="full"),
+        FieldPanel('points_for_this_service', classname="title"),
+
+    ]
+
 
 
 class QuestionTextFormField(AbstractFormField):

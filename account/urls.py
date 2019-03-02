@@ -21,6 +21,7 @@ urlpatterns = [
     path('edit/', views.edit, name='edit'),
     path('aboutus/', views.aboutus, name='aboutus'),
     path('users/', views.users, name='users'),
+    path('view-rewards/', views.viewRewards, name='rewards'),
     path('createprogram/', views.createprogram, name='createprogram'),
     path('programs/', views.createprogram, name='programs'),
 
@@ -28,6 +29,7 @@ urlpatterns = [
     path('registerusers/', views.registerusers, name='registerusers'),
     path('userdashboard/', views.userdashboard, name='userdashboard'),
     path('cms_frame/', views.cms_frame, name='cms_frame'),
+    path('redeem-rewards/', views.rewards_redeem, name='redeem_rewards'),
     path('django_frame/', views.django_frame, name='django_frame'),
     path('profile/<int:pk>/', views.profile, name='profile'),
     path('archive/', views.archive, name='archive'),
