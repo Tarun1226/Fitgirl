@@ -8,6 +8,9 @@ from .models import RegisterUser, Affirmations, Dailyquote, Parameters, Reward
 from week.models import WeekPage, UserActivity, ServicePostPage
 from io import TextIOWrapper, StringIO
 import re
+import weasyprint
+from io import BytesIO
+from django.template.loader import render_to_string
 
 from django.shortcuts import redirect
 import csv, string, random
@@ -19,7 +22,7 @@ from django.conf import settings
 from django.forms import ValidationError
 from datetime import datetime
 import datetime
-from django.core.mail import send_mass_mail, BadHeaderError, send_mail
+from django.core.mail import send_mass_mail, BadHeaderError, send_mail, EmailMessage
 
 
 def user_login(request):
@@ -459,14 +462,34 @@ def rewards_redeem(request):
         point = int(points)
         print(type(point))
         user1=User.objects.get(username=request.user.username)
-        print(user1.profile.points)
-        user1.profile.points -= point
-        user1.profile.save()
-        points_available = user1.profile.points
-        rewards = Reward.objects.create(user=user1, points_redeemed=point, service_used=service)
-        reward_number = rewards.reward_no
-        return render(request, 'rewards/reward_confirmation.html', {'point': point, 'service': service, 'points_available': points_available,
-                                                        'reward_number': reward_number})
+        print(user1.profile.points, point)
+        if user1.profile.points < point:
+            print('cannot redeem')
+        else:
+            print('ask if user wants to continue?')
+            user1.profile.points -= point
+            user1.profile.save()
+            points_available = user1.profile.points
+            rewards = Reward.objects.create(user=user1, points_redeemed=point, service_used=service)
+            reward_number = rewards.reward_no
+            subject = 'Confirmation Rewards Redeemed - Redemption No.'.format(rewards.reward_no)
+            messages = 'Check the PDF attachment for your redemption number'
+            from_email = 'capstone18FA@gmail.com'
+            email = EmailMessage(subject, messages, from_email, [user1.email])
+            print(user1.email)
+            #genarate PDF
+            html = render_to_string('rewards/pdf.html',{'point': point, 'service': service,
+                                                                        'points_available': points_available,
+                                                                        'reward_number': reward_number})
+            out = BytesIO()
+            stylesheets = [weasyprint.CSS(settings.STATIC_CSS + '/css/pdf.css')]
+            print(stylesheets)
+            weasyprint.HTML(string=html).write_pdf(out,stylesheets=stylesheets)
+            email.attach('Redemption No. {}'.format(rewards.reward_no), out.getvalue(), 'application/pdf')
+            email.send()
+            return render(request, 'rewards/reward_confirmation.html', {'point': point, 'service': service,
+                                                                        'points_available': points_available,
+                                                                        'reward_number': reward_number})
 
 @login_required
 def viewRewards(request):

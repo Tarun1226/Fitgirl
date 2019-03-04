@@ -39,6 +39,8 @@ wagtailmenus==2.12
 webencodings==0.5.1
 whitenoise==4.1
 Willow==1.1
+WeasyPrint==45
+django-easy-pdf==0.2.0
 django-crispy-forms==1.7.2
 boto3==1.9.57
 

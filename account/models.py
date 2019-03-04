@@ -93,6 +93,10 @@ class Profile(models.Model):
         else:
             return int((datetime.now().date() - self.date_of_birth).days / 365.25)
 
+    def get_context(self, value):
+        context = super(Profile, self).get_context(value)
+        user1=User.objects.get(username=request.user.username)
+        context['points'] = (value['points'] == user1.Profile)
 
 class Parameters(models.Model):
     physical_days_to_done = models.IntegerField(default=1)
